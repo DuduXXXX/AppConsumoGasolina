@@ -5,62 +5,88 @@ import {
   Text,
   View,
   TextInput,
-  Button,
-  Image,
-  Alert,
   TouchableOpacity,
+  Image,
   ActivityIndicator,
 } from "react-native";
 import { useNavigation } from '@react-navigation/native';
 
 export default function Home() {
   const navigation = useNavigation();
-  const [quilometragem, setQuilometragem] = useState();
-  const [litros, setLitros] = useState();
+  const [quilometragem, setQuilometragem] = useState('');
+  const [litros, setLitros] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     setLoading(true);
-
     setTimeout(() => {
       console.log("Teste de Funcionamento");
       setLoading(false);
     }, 2000);
   }, []);
 
-  function stopLoading() {
-    setLoading(!loading);
-  }
+  const validateInput = () => {
+    const quilometragemNum = parseFloat(quilometragem);
+    const litrosNum = parseFloat(litros);
+
+    // Verificar se os campos estão vazios
+    if (quilometragem.trim() === "" || litros.trim() === "") {
+      setError("Por favor, preencha todos os campos.");
+      return false;
+    }
+
+    // Verificar se os valores inseridos são números válidos
+    if (isNaN(quilometragemNum) || isNaN(litrosNum)) {
+      setError("Por favor, insira apenas números.");
+      return false;
+    }
+
+    // Verificar se os valores são maiores que 0
+    if (quilometragemNum <= 0 || litrosNum <= 0) {
+      setError("Os números devem ser maiores que 0.");
+      return false;
+    }
+
+    setError('');
+    return true;
+  };
 
   const IrParaConsumo = () => {
-    navigation.navigate("Consumo", {
-      quilometragem, litros
-    });
+    if (validateInput()) {
+      navigation.navigate("Consumo", {
+        quilometragem: parseFloat(quilometragem),
+        litros: parseFloat(litros),
+      });
+    }
   };
 
   return (
     <View style={styles.container}>
-      <Image style={styles.image} source={require('../assets/logoProj.png')}></Image>
-      <Text style={styles.title}>Consumo de Gasolina</Text>
+      <Image style={styles.image} source={require('../assets/logo.png')} />
+      <Text style={styles.title}>Cálculo de Consumo</Text>
 
       <TextInput 
         value={quilometragem}
         onChangeText={setQuilometragem}
-        placeholder="Informe a quilometragem em KM"
-        style={styles.estiloCampoTexto}
+        placeholder="Quilometragem (KM)"
+        style={styles.input}
       />
 
       <TextInput 
         value={litros}
         onChangeText={setLitros}
-        placeholder="Consumo de gasolina em Litros"
-        style={styles.estiloCampoTexto}
+        placeholder="Litros de Gasolina"
+        style={styles.input}
       />
 
+      {error ? <Text style={styles.errorText}>{error}</Text> : null}
+
       <TouchableOpacity style={styles.button} onPress={IrParaConsumo}>
-        <Text style={styles.buttonText}>Executar</Text>
+        <Text style={styles.buttonText}>Calcular</Text>
       </TouchableOpacity>
-      <ActivityIndicator style={styles.loading} animating={loading} color={"darkred"} />
+
+      <ActivityIndicator style={styles.loading} animating={loading} color={"#ffffff"} />
     </View>
   );
 }
@@ -68,23 +94,23 @@ export default function Home() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fffaf0',
+    backgroundColor: '#000000', 
     alignItems: 'center',
     justifyContent: 'center',
   },
-  estiloCampoTexto: {
-    backgroundColor: '#F3F3FF',
+  input: {
+    backgroundColor: '#44475a',
     fontWeight: '600',
     paddingLeft: 20,
     borderWidth: 1,
-    width: "80%",
-    height: 60,
-    borderRadius: 10,
-    borderColor: 'grey',
-    margin: 6,
-    color: "#9c0000",
-    fontSize: 15,
-    shadowOffset: { // adicionando sombras
+    width: "85%",
+    height: 50,
+    borderRadius: 12,
+    borderColor: '#6272a4', 
+    margin: 10,
+    color: "#f8f8f2",
+    fontSize: 16,
+    shadowOffset: {
       width: 4,
       height: 4
     },
@@ -93,48 +119,46 @@ const styles = StyleSheet.create({
     elevation: 1
   },
   button: {
-    borderWidth: 1,
-    padding: 15,
-    borderRadius: 10,
-    borderWidth: 0,
-    marginTop: 15,
+    paddingVertical: 15, 
+    paddingHorizontal: 30,
+    borderRadius: 12,
+    marginTop: 20,
     marginBottom: 20,
-    width: "80%",
-    height: 60,
+    width: "85%",
     justifyContent: "center",
     alignItems: "center",
-    borderColor: "#000",
-    backgroundColor: '#9c0000',
-    shadowOffset: { // adicionando sombras
+    backgroundColor: '#50fa7b', 
+    shadowOffset: {
       width: 4,
       height: 4
     },
     shadowOpacity: 0.25,
     shadowRadius: 3.8,
-    elevation: 1
+    elevation: 2
   },
   buttonText: {
     fontSize: 20,
     fontWeight: "bold",
-    color: '#fff'
+    color: '#282c34' 
   },
   image:{
-    width: 200,
-    height: 200,
+    width: 250,
+    height: 250,
+    marginBottom: 20,
   },
   title: {
-    fontSize: 28,
+    fontSize: 30,
     fontWeight: 'bold',
-    marginBottom: 30,
-    fontStyle: 'italic',
-    color: '#9c0000',
+    marginBottom: 40,
+    color: '#ff79c6', 
   },
   loading: {
     marginTop: 20,
     size: 'large',
-    transform: [{ scale: 2 }] // aumentar o tamanho do loading
-
+    transform: [{ scale: 1.5 }] 
+  },
+  errorText: {
+    color: 'red',
+    marginBottom: 10,
   }
-
-
 });
